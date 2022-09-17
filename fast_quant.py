@@ -40,7 +40,7 @@ class Quant:
         self.time = 0
         self.log_asset = []
         self.log_index = []
-        self.time_list=[]
+        self.time_list = []
         self.plot = True
 
     @property
@@ -58,7 +58,7 @@ class Quant:
             self.time = _now_data['trade_date']
             self.next_data = self.data.iloc[i + 1].to_dict()
             self.now_data = _now_data
-            self.callback(_now_data)
+            self.on_bar(_now_data)
             self.account = {'code': self.account['code'], 'total': self.next_data['open'] * self.account['quantity'],
                             'last_price': self.next_data['open'], 'quantity': self.account['quantity']}
             self.locked = self.account['total']
@@ -74,8 +74,8 @@ class Quant:
         ret_log_asset = []
         _ret_index = 1
         _ret_asset = 1
-        self.time_list=self.time_list[1:]
-        self.time_list =[str(self.time_list[i]) for i in range(len(self.time_list))]
+        self.time_list = self.time_list[1:]
+        self.time_list = [str(self.time_list[i]) for i in range(len(self.time_list))]
         for i in range(1, len(self.log_index)):
             _ret_index = _ret_index * (1 + (self.log_index[i] - self.log_index[i - 1]) / self.log_index[i - 1])
             ret_log_index.append(_ret_index)
@@ -84,16 +84,14 @@ class Quant:
         from matplotlib import pyplot as plt
         import matplotlib.ticker as ticker
 
-
-
         plt.rcParams['font.sans-serif'] = ['SimHei']
         plt.rcParams['axes.unicode_minus'] = False
         plt.xlabel('时间')
         plt.ylabel('收益净值')
-        plt.plot(self.time_list,ret_log_index, label='index')
-        plt.plot(self.time_list,ret_log_asset, label='asset')
+        plt.plot(self.time_list, ret_log_index, label='index')
+        plt.plot(self.time_list, ret_log_asset, label='asset')
 
-        plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(int(len(self.time_list)/6)))
+        plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(int(len(self.time_list) / 6)))
         plt.legend()
         plt.show()
 
@@ -126,7 +124,7 @@ class Quant:
         self.locked = self.account['total']
         self.total = self.cash + self.locked
 
-    def callback(self, data):
+    def on_bar(self, data):
         raise NotImplementedError
 
 
@@ -136,7 +134,7 @@ class Strategy(Quant):
         self.ret = 0
         self.close_list = []
 
-    def callback(self, data):
+    def on_bar(self, data):
         # print(data)
         if random.random() > 0.5:
             self.create_order(10, 'buy')
@@ -145,6 +143,7 @@ class Strategy(Quant):
             if not self.position or self.position[data['ts_code']] <= 0:
                 return
             self.create_order(10, 'sell')
+
         print(self.asset)
 
 
